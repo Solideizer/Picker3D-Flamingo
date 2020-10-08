@@ -5,128 +5,123 @@ using UnityEngine.UI;
 
 public class Collector : MonoBehaviour
 {
-    [SerializeField] private float speed = 1f;
-    [SerializeField] private Slider progressBar;
+	#region Variable Declarations
 
-    private Rigidbody rb;
-    private float objZPos;
-    private float movZ;
-    private Score scoreScript;
+	[SerializeField] private float speed = 1f;
+	[SerializeField] private Slider progressBar;
 
-    public Animator[] checkpointAnim;
-    public bool passFlag = false;
+	public Animator[] checkpointAnim;
+	public bool passFlag = false;
 
-    private int checkpointFlag;
-    private bool firstEntry;
+	private Score _scoreScript;
+	private Rigidbody _rigidbody;
+	private Camera _mainCam;
+	private float _objZPos;
+	private float _movZ;
+	private int _checkpointFlag;
+	private bool _firstEntry;
 
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody>();
-        scoreScript = FindObjectOfType<Score>();
-        checkpointFlag = 0;
-        progressBar.value = 0;
-        firstEntry = true;
-    }
+	#endregion
 
-    private void OnMouseDown()
-    {
-        objZPos = Camera.main.WorldToScreenPoint(gameObject.transform.position).z;
-    }
+	private void Awake()
+	{
+		_mainCam = Camera.main;
+		_rigidbody = GetComponent<Rigidbody>();
+		_scoreScript = FindObjectOfType<Score>();
+		_checkpointFlag = 0;
+		progressBar.value = 0;
+		_firstEntry = true;
+	}
 
-    private void OnMouseDrag()
-    {
-        var mousePoint = Input.mousePosition;
-        mousePoint.z = objZPos;
-        movZ = Camera.main.ScreenToWorldPoint(mousePoint).z;
-    }
+	private void OnMouseDown()
+	{
+		_objZPos = _mainCam.WorldToScreenPoint(gameObject.transform.position).z;
+	}
 
-    private void FixedUpdate()
-    {
-        var x = (speed * Time.fixedDeltaTime) * -1;
+	private void OnMouseDrag()
+	{
+		var mousePoint = Input.mousePosition;
+		mousePoint.z = _objZPos;
+		_movZ = _mainCam.ScreenToWorldPoint(mousePoint).z;
+	}
 
-        var newPosition = transform.position + new Vector3(x, 0, 0);
+	private void FixedUpdate()
+	{
+		var x = (speed * Time.fixedDeltaTime) * -1;
 
-        //to stay on the track
-        if (movZ > 0.9f)
-        {
-            newPosition.z = 0.9f;
-        }
-        else if (movZ < -1.9f)
-        {
-            newPosition.z = -1.9f;
-        }
-        else
-        {
-            newPosition.z = movZ;
-        }
+		var newPosition = transform.position + new Vector3(x, 0, 0);
 
-        rb.MovePosition(newPosition);
-    }
+		//to stay on the track
+		if (_movZ > 0.9f)
+		{
+			newPosition.z = 0.9f;
+		}
+		else if (_movZ < -1.9f)
+		{
+			newPosition.z = -1.9f;
+		}
+		else
+		{
+			newPosition.z = _movZ;
+		}
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("StopPoint"))
-        {
-            Debug.Log("stoppoint");
+		_rigidbody.MovePosition(newPosition);
+	}
 
-            speed = 0;
-            Destroy(other.gameObject);
+	private void OnTriggerEnter(Collider other)
+	{
+		if (other.CompareTag("StopPoint"))
+		{
+			speed = 0;
+			Destroy(other.gameObject);
 
-            StartCoroutine(Checkpoint());
-        }
-        if (other.CompareTag("EndPoint") & firstEntry)
-        {
-            Debug.Log(progressBar.value);
-            progressBar.value++;
-            firstEntry = false;
-            Debug.Log(progressBar.value);
-            StartCoroutine(EndPoint());
-        }
-        if (other.CompareTag("NextLevel"))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-        }
-    }
+			StartCoroutine(Checkpoint());
+		}
 
-    private IEnumerator Checkpoint()
-    {
-        Debug.Log("coroutine calısıyor");
+		if (other.CompareTag("EndPoint") & _firstEntry)
+		{
+			progressBar.value++;
+			_firstEntry = false;
+			StartCoroutine(EndPoint());
+		}
 
-        yield return new WaitForSeconds(2f);
-        //Debug.Log(scoreScript.score);
+		if (other.CompareTag("NextLevel"))
+		{
+			SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+		}
+	}
 
-        //check if score is high enough to continue
-        //if (scoreScript.score >= 10)
+	private IEnumerator Checkpoint()
+	{
+		yield return new WaitForSeconds(2f);
 
-        if (passFlag)
-        {
-            //play animation
-            //Debug.Log(checkpointFlag);
-            checkpointAnim[checkpointFlag].SetTrigger("Checkpoint");
+		if (passFlag)
+		{
+			checkpointAnim[_checkpointFlag].SetTrigger("Checkpoint");
 
-            Debug.Log("animation played");
-            yield return new WaitForSeconds(2f);
+			//Debug.Log("animation played");
+			yield return new WaitForSeconds(2f);
 
-            speed = 4f;
+			speed = 4f;
 
-            Debug.Log("continue");
-            checkpointFlag = 1;
-        }
-        else
-        {
-            StartCoroutine(RestartLevel());
-        }
-    }
+			//Debug.Log("continue");
+			_checkpointFlag = 1;
+		}
+		else
+		{
+			StartCoroutine(RestartLevel());
+		}
+	}
 
-    private IEnumerator EndPoint()
-    {
-        yield return new WaitForSeconds(5f);
-        firstEntry = true;
-    }
+	private IEnumerator EndPoint()
+	{
+		yield return new WaitForSeconds(5f);
+		_firstEntry = true;
+	}
 
-    private IEnumerator RestartLevel()
-    {
-        yield return new WaitForSeconds(1f);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
+	private IEnumerator RestartLevel()
+	{
+		yield return new WaitForSeconds(1f);
+		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+	}
 }

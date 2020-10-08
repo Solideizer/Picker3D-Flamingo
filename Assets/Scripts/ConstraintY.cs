@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class ConstraintY : MonoBehaviour
 {
-    private Rigidbody rb;
+    private Rigidbody _rigidbody;
 
     private void Awake()
     {
-       rb = GetComponent<Rigidbody>();
+       _rigidbody = GetComponent<Rigidbody>();
     }
 
     void Update()
     {
         if(transform.position.y > 0.3f)
         {
-           rb.MovePosition(new Vector3(transform.position.x, 0.3f, transform.position.z));
+           _rigidbody.MovePosition(new Vector3(transform.position.x, 0.3f, transform.position.z));
         }
     }
 }
