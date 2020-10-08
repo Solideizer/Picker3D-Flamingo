@@ -3,12 +3,16 @@ using UnityEngine;
 
 public class Score : MonoBehaviour
 {
+	#region Variable Declarations
+#pragma warning disable 0649
 	[SerializeField] private TMP_Text text;
 	[SerializeField] private TMP_Text coins;
-
-	private Collector _collectorScript;
+	
 	public int score;
-
+	private Collector _collectorScript;
+#pragma warning restore 0649
+	#endregion
+	
 	private void Awake()
 	{
 		_collectorScript = FindObjectOfType<Collector>();

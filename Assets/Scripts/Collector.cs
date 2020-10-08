@@ -6,10 +6,10 @@ using UnityEngine.UI;
 public class Collector : MonoBehaviour
 {
 	#region Variable Declarations
-
+#pragma warning disable 0649
 	[SerializeField] private float speed = 1f;
 	[SerializeField] private Slider progressBar;
-
+#pragma warning restore 0649
 	public Animator[] checkpointAnim;
 	public bool passFlag = false;
 
